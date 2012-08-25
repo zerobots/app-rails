@@ -7,7 +7,6 @@
     rbenv_home: /usr/local/rbenv
     rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH
     rbenv_cmd: $rbenv_env rbenv
-    app_home: /opt/zerobot/zerobots-rails/app
     app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
 
   tasks:
