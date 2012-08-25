@@ -5,10 +5,10 @@
 
     ruby_version: 1.9.3-p194
     rbenv_home: /usr/local/rbenv
-    rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH 
+    rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH
     rbenv_cmd: $rbenv_env rbenv
-    app_home: /home/ec2-user/steverails/app
-    app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH 
+    app_home: /opt/zerobot/zerobot-rails
+    app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
 
   tasks:
 
@@ -55,7 +55,7 @@
     action: shell $rbenv_env bundle install --deployment --binstubs --shebang ruby-local-exec chdir=$app_home
 
   - name: "Run rails server"
-    action: shell $app_env rails server -d chdir=$app_home
+    action: shell $app_env unicorn_rails -D chdir=$app_home
 
   - name: Install nginx
     action: yum name=nginx
