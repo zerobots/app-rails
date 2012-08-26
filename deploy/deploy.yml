@@ -8,6 +8,7 @@
     rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH
     rbenv_cmd: $rbenv_env rbenv
     app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
+    rails_app_home: $app_home/app
 
   tasks:
 
@@ -51,10 +52,10 @@
     action: yum name=sqlite-devel
 
   - name: "Bundle install"
-    action: shell $rbenv_env bundle install --deployment --binstubs --shebang ruby-local-exec chdir=$app_home
+    action: shell $rbenv_env bundle install --deployment --binstubs --shebang ruby-local-exec chdir=$rails_app_home/app
 
   - name: "Run rails server"
-    action: shell $app_env unicorn_rails -D chdir=$app_home
+    action: shell $app_env unicorn_rails -D chdir=$rails_app_home
 
   - name: Install nginx
     action: yum name=nginx
