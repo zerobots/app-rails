@@ -3,12 +3,16 @@
 
   vars:
 
+    url_path: /
     ruby_version: 1.9.3-p194
     rbenv_home: /usr/local/rbenv
     rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH
     rbenv_cmd: $rbenv_env rbenv
     app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/app/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
     rails_app_home: $app_home/app
+
+  vars_files:
+    - env.yaml
 
   tasks:
 
