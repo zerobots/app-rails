@@ -10,6 +10,10 @@
     app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/app/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
     rails_app_home: $app_home/app
 
+    APP_NAME: rails
+    NEW_RELIC_KEY: ""
+    NEW_RELIC_MONITORING_MODE: false
+
   vars_files:
     - env.yaml
 
@@ -35,6 +39,9 @@
 
   - name: "Set rbenv environment"
     action: template src=rbenv.sh dest=/etc/profile.d/rbenv.sh
+
+  - name: "Setup new relic"
+    action: template src=newrelic.yml dest=$rails_app_home/app/config/
 
   - name: "Install ruby"
     action: shell CONFIGURE_OPTS=--disable-install-doc $rbenv_cmd install $ruby_version creates=$rbenv_home/versions/$ruby_version
