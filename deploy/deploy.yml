@@ -41,7 +41,7 @@
     action: template src=rbenv.sh dest=/etc/profile.d/rbenv.sh
 
   - name: "Setup new relic"
-    action: template src=newrelic.yml dest=$rails_app_home/app/config/
+    action: template src=newrelic.yml dest=$rails_app_home/config/newrelic.yml
 
   - name: "Install ruby"
     action: shell CONFIGURE_OPTS=--disable-install-doc $rbenv_cmd install $ruby_version creates=$rbenv_home/versions/$ruby_version
