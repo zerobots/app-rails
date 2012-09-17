@@ -3,75 +3,37 @@
 
   vars:
 
-    ruby_version: 1.9.3-p194
-    rbenv_home: /usr/local/rbenv
-    rbenv_env: RBENV_ROOT=$rbenv_home PATH=$rbenv_home/shims:$rbenv_home/bin:$PATH
-    rbenv_cmd: $rbenv_env rbenv
-    app_env: RBENV_ROOT=$rbenv_home PATH=$app_home/app/bin:$rbenv_home/shims:$rbenv_home/bin:$PATH
     rails_app_home: $app_home/app
 
     APP_NAME: rails
     NEW_RELIC_KEY: ""
     NEW_RELIC_MONITORING_MODE: false
 
+
   vars_files:
     - env.yaml
 
+
   tasks:
-
-  - name: "Install rbenv dependencies"
-    action: yum name=${item}
-    with_items:
-      - gcc
-      - gcc-c++
-      - zlib
-      - zlib-devel
-      - openssl
-      - openssl-devel
-      - make
-      - git
-
-  - name: "Install rbenv"
-    action: git repo=git://github.com/sstephenson/rbenv.git dest=$rbenv_home
-
-  - name: "Install ruby-build"
-    action: git repo=git://github.com/sstephenson/ruby-build.git dest=$rbenv_home/plugins/ruby-build
-
-  - name: "Set rbenv environment"
-    action: template src=rbenv.sh dest=/etc/profile.d/rbenv.sh
 
   - name: "Setup new relic"
     action: template src=newrelic.yml dest=$rails_app_home/config/newrelic.yml
 
-  - name: "Install ruby"
-    action: shell CONFIGURE_OPTS=--disable-install-doc $rbenv_cmd install $ruby_version creates=$rbenv_home/versions/$ruby_version
-
-  - name: "Rehash rbenv"
-    action: shell $rbenv_cmd rehash
-
-  - name: "Set global ruby"
-    action: shell $rbenv_cmd global $ruby_version
-
-  - name: "Install bundler"
-    action: shell $rbenv_env gem install bundler --no-rdoc --no-ri
-
-  - name: "Rehash rbenv"
-    action: shell $rbenv_cmd rehash
-
   - name: "Install app dependencies"
     action: yum name=sqlite-devel
-
-  - name: "Bundle install"
-    action: shell $rbenv_env bundle install --deployment --binstubs --shebang ruby-local-exec chdir=$rails_app_home/app
-
-  - name: "Run rails server"
-    action: shell $app_env unicorn_rails -D chdir=$rails_app_home
 
   - name: Install nginx
     action: yum name=nginx
 
   - name: Configure nginx
     action: template src=nginx-default.conf dest=/etc/nginx/conf.d/default.conf
+    notify:
+    - restart nginx
 
-  - name: Start nginx
+  - name: Ensure nginx is running
     action: service name=nginx state=started
+
+
+  handlers:
+  - name: restart nginx
+    action: service name=nginx state=restarted
