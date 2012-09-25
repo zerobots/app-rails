@@ -1,0 +1,42 @@
+---
+- hosts: vagrant
+  user: vagrant
+  sudo: True
+
+  vars:
+
+    rails_app_home: $app_home/app
+
+    APP_NAME: rails
+    NEW_RELIC_KEY: ""
+    NEW_RELIC_MONITORING_MODE: false
+
+  vars_files:
+    - vagrant-env.yml
+
+  tasks:
+
+  - name: "Setup new relic"
+    action: template src=newrelic.yml dest=$rails_app_home/config/newrelic.yml
+
+  - name: "Add Fedora EPEL repository"
+    action: command rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm creates=/etc/yum.repos.d/epel.repo
+
+  - name: "Install app dependencies"
+    action: yum name=sqlite-devel
+
+  - name: Install nginx
+    action: yum name=nginx
+
+  - name: Configure nginx
+    action: template src=nginx-default.conf dest=/etc/nginx/conf.d/default.conf
+    notify:
+    - restart nginx
+
+  - name: Ensure nginx is running
+    action: service name=nginx state=started
+
+
+  handlers:
+  - name: restart nginx
+    action: service name=nginx state=restarted
