@@ -1,6 +1,10 @@
 ---
 properties:
 
+  - name: RAILS_ENV
+    default: development
+    description: The Rails environment that this app will run under
+
   - name: db_host
     default: localhost
     description: Host name or IP address of the database server for this app
