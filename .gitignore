@@ -1,2 +1,3 @@
 .vagrant
 newrelic.yml
+app/bin

@@ -5,9 +5,11 @@
 
     rails_app_home: $app_home/app
 
-    APP_NAME: rails
-    NEW_RELIC_KEY: ""
-    NEW_RELIC_MONITORING_MODE: false
+    app_name: rails
+    project_name: project
+    enviroment_name: environment
+    new_relic_key: ""
+    new_relic_monitoring_mode: false
 
 
   vars_files:

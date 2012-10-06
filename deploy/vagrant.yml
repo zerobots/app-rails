@@ -1,42 +1,118 @@
 ---
+### Setup the system
 - hosts: vagrant
   user: vagrant
-  sudo: True
+  sudo: true
+  gather_facts: False
 
   vars:
+    pgdata: /var/lib/pgsql/data
+    db_username: rails
+    db_password: rails
+    db_name: rails
 
-    rails_app_home: $app_home/app
-
-    APP_NAME: rails
-    NEW_RELIC_KEY: ""
-    NEW_RELIC_MONITORING_MODE: false
-
-  vars_files:
-    - vagrant-env.yml
+    check_user_exists: psql -U postgres -tA -c "SELECT count(1) FROM pg_roles where rolname='$db_username';"
+    create_user: psql -U postgres -c "CREATE ROLE $db_username WITH LOGIN PASSWORD '$db_password';"
+    check_database_exists: psql -U postgres -tA -c "SELECT count(1) FROM pg_database WHERE datname = '$db_name';"
+    create_database: psql -U postgres -c "CREATE DATABASE $db_name WITH OWNER = $db_username;"
 
   tasks:
-
-  - name: "Setup new relic"
-    action: template src=newrelic.yml dest=$rails_app_home/config/newrelic.yml
-
   - name: "Add Fedora EPEL repository"
     action: command rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm creates=/etc/yum.repos.d/epel.repo
 
+  - name: "Install Dependencies"
+    action: yum name=${item}
+    with_items:
+    - git
+    - vim
+    - postgresql
+    - postgresql-server
+    - postgresql-devel
+
+  - name: "Open Port 8080"
+    action: shell /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+
+  - name: "Open Port 3000"
+    action: shell /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+
+  - name: "Save IpTables"
+    action: shell /sbin/service iptables save
+
+    ##Setup PostgreSQL
+  - name: Initialise PostgreSQL
+    action: command /sbin/service postgresql initdb creates=$pgdata/pg_hba.conf
+
+  - name: "Use our pg_hba to config PostgreSQL"
+    action: copy src=vagrant_pg_hba.conf dest=$pgdata/pg_hba.conf 
+
+  - name: Start PostgreSQL service
+    action: service name=postgresql state=started
+
+  - name: Ensure PostgreSQL is started
+    action: wait_for port=5432 
+
+  - name: "Reload Config files"
+    action: shell su postgres --command="pg_ctl reload --pgdata /var/lib/pgsql/data/"
+
+  - name: Create database user
+    # action: postgresql_user name=$db_username password=$db_password db=$db_name   
+    action: shell if [ "`$check_user_exists`" != "1" ]; then $create_user; fi
+
+  - name: Create database
+    # action: postgresql_db name=$db_name 
+    action: shell if [ "`$check_database_exists`" != "1" ]; then $create_database; fi
+
+### Setup the user space
+- hosts: vagrant
+  user: vagrant
+  gather_facts: False
+
+  vars:
+    new_relic_key: ""
+    new_relic_monitoring_mode: false
+    ruby_version: 1.9.3-p194
+    home: /home/vagrant
+    rbenv_path: $home/.rbenv
+    rbenv_env: RBENV_ROOT=$rbenv_path PATH=$rbenv_path/shims:$rbenv_path/bin:$PATH
+    rbenv_cmd: $rbenv_env rbenv
+    app_home: $home/project/app
+    db_username: rails
+    db_password: rails
+    db_name: rails
+
+  tasks:
+  - name: "Clean up home directory"
+    action: command rm postinstall.sh removes=postinstall.sh
+
+  - name: "Install rbenv"
+    action: git repo=git://github.com/sstephenson/rbenv.git dest=$rbenv_path 
+
+  - name: "Add .vagrant_shell into to home"
+    action: template src=vagrant_shell.sh  dest=$home/.vagrant
+
+  - name: "Add .vagrant_shell to path"
+    action: lineinfile name=$home/.bashrc regexp="source \.vagrant" insertafter=EOF line="source .vagrant" 
+
+  - name: "Install ruby-build"
+    action: git repo=git://github.com/sstephenson/ruby-build.git dest=$rbenv_path/plugins/ruby-build
+
+  - name: "Install ruby version"
+    action: shell $rbenv_cmd install $ruby_version creates=$rbenv_path/versions/$ruby_version
+
+  - name: "Set ruby version as default"
+    action: shell rbenv global $ruby_version creates=$rbenv_path/version
+
+  - name: "Install bundler"
+    action: shell $rbenv_env gem install bundler creates=$rbenv_path/versions/$ruby_version/bin/bundle
+
+  - name: "Rehash rbenv"
+    action: shell $rbenv_cmd rehash
+
   - name: "Install app dependencies"
-    action: yum name=sqlite-devel
+    action: shell $rbenv_env bundle install chdir=$app_home
 
-  - name: Install nginx
-    action: yum name=nginx
+  - name: "Rehash rbenv"
+    action: shell $rbenv_cmd rehash
 
-  - name: Configure nginx
-    action: template src=nginx-default.conf dest=/etc/nginx/conf.d/default.conf
-    notify:
-    - restart nginx
-
-  - name: Ensure nginx is running
-    action: service name=nginx state=started
-
-
-  handlers:
-  - name: restart nginx
-    action: service name=nginx state=restarted
+  - name: "Setup new relic"
+    action: template src=newrelic.yml dest=$app_home/config/newrelic.yml
