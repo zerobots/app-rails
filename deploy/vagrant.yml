@@ -12,7 +12,7 @@
     db_name: rails
 
     check_user_exists: psql -U postgres -tA -c "SELECT count(1) FROM pg_roles where rolname='$db_username';"
-    create_user: psql -U postgres -c "CREATE ROLE $db_username WITH LOGIN PASSWORD '$db_password';"
+    create_user: psql -U postgres -c "CREATE ROLE $db_username WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD '$db_password';"
     check_database_exists: psql -U postgres -tA -c "SELECT count(1) FROM pg_database WHERE datname = '$db_name';"
     create_database: psql -U postgres -c "CREATE DATABASE $db_name WITH OWNER = $db_username;"
 
@@ -117,6 +117,3 @@
 
   - name: "Rehash rbenv"
     action: shell $rbenv_cmd rehash
-
-  - name: "Setup new relic"
-    action: template src=newrelic.yml dest=$app_home/config/newrelic.yml

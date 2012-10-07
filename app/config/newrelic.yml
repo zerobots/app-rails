@@ -1,0 +1,37 @@
+# This file is no-op place holder for newrelic.  
+# This file should be replaced by the deploy script when run for real.
+common: &default_settings
+  license_key: 
+  app_name: rails
+  monitor_mode: false
+  developer_mode: true
+  log_level: info
+  ssl: false
+  apdex_t: 0.5
+  capture_params: false
+
+  transaction_tracer:
+    enabled: false
+    transaction_threshold: apdex_f
+    record_sql: obfuscated
+    stack_trace_threshold: 0.500
+  error_collector:
+    enabled: false
+    capture_source: false    
+    ignore_errors: ActionController::RoutingError
+
+development:
+  <<: *default_settings
+  developer_mode: true
+
+test:
+  <<: *default_settings
+  developer_mode: true
+
+production:
+  <<: *default_settings
+  developer_mode: true
+
+staging:
+  <<: *default_settings
+  developer_mode: true
