@@ -33,7 +33,7 @@
     action: shell /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
 
   - name: "Open Port 3000"
-    action: shell /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+    action: shell /sbin/iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
 
   - name: "Save IpTables"
     action: shell /sbin/service iptables save
