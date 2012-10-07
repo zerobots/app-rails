@@ -30,6 +30,9 @@
   - name: Start memcache service
     action: service name=memcached state=started
 
+  - name: Database migrate
+    action: 'shell su -l -c "cd ${rails_app_home}; source ${app_name}.env; export db_password db_port db_name db_host db_username; rake db:migrate" ${app_name}'
+
   - name: Install nginx
     action: yum name=nginx
 
