@@ -28,6 +28,7 @@
     - postgresql
     - postgresql-server
     - postgresql-devel
+    - memcached
 
   - name: "Open Port 8080"
     action: shell /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
@@ -37,6 +38,9 @@
 
   - name: "Save IpTables"
     action: shell /sbin/service iptables save
+
+  - name: Start memcache service
+    action: service name=memcached state=started
 
     ##Setup PostgreSQL
   - name: Initialise PostgreSQL

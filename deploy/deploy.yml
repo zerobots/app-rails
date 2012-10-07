@@ -22,7 +22,13 @@
     action: template src=newrelic.yml dest=$rails_app_home/config/newrelic.yml
 
   - name: "Install app dependencies"
-    action: yum name=sqlite-devel
+    action: yum name=${item}
+    with_items:
+    - sqlite-devel
+    - memcached
+
+  - name: Start memcache service
+    action: service name=memcached state=started
 
   - name: Install nginx
     action: yum name=nginx
@@ -34,7 +40,6 @@
 
   - name: Ensure nginx is running
     action: service name=nginx state=started
-
 
   handlers:
   - name: restart nginx

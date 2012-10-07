@@ -5,7 +5,7 @@ You have a new rails app template with the following configuration:
 * Client-side - Jquery-UI
 * Authentication - Devise
 * Authorisation - CanCam
-* Caching
+* Caching - MemCached & Dalli
 * Persistence/ORM - ActiveRecord
 * Database - PostgreSQL
 * App Server - Rails 3.1, Ruby 1.9.2
