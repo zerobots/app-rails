@@ -4,7 +4,7 @@ You have a new rails app template with the following configuration:
 * Web server - Unicorn or WEBrick
 * Client-side - Jquery-UI
 * Authentication - Devise
-* Authorisation
+* Authorisation - CanCam
 * Caching
 * Persistence/ORM - ActiveRecord
 * Database - PostgreSQL
