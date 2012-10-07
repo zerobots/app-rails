@@ -9,6 +9,5 @@ You have a new rails app template with the following configuration:
 * Persistence/ORM - ActiveRecord
 * Database - PostgreSQL
 * App Server - Rails 3.1, Ruby 1.9.2
-* Testing
-* Coverage
+* Testing - Rspec
 * Monitoring - New Relic
