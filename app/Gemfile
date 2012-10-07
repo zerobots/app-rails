@@ -45,4 +45,7 @@ gem 'devise'
 gem 'cancan'
 gem 'dalli'
 
-gem 'rspec-rails', :group => [:test, :development]
+group :test, :development do
+	gem 'rspec-rails'
+	gem 'factory_girl_rails'
+end
